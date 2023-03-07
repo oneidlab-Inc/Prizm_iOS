@@ -105,25 +105,6 @@ class _TabPageState extends State<TabPage> {
   var deviceData;
   var _deviceData;
 
-  Future<void> remoteconfig() async {
-    final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    var packageVersion = packageInfo.version;
-    // var version = MyApp.appVersion;
-
-    remoteConfig.setDefaults({'appVersion' : packageVersion});
-    await remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: const Duration(minutes: 1),
-        minimumFetchInterval: Duration.zero));
-    await remoteConfig.fetchAndActivate();
-
-    String appVersion = remoteConfig.getString('appVersion');
-    MyApp.appVersion = appVersion;
-
-    if(appVersion != packageVersion) {
-      showDefaultDialog();
-    }
-  }
 
   Future<void> initPlatformState() async {
     String? deviceId;
@@ -278,7 +259,6 @@ class _TabPageState extends State<TabPage> {
 
   @override
   void initState() {
-    remoteconfig();
     getShortLink();
     fetchData();
     // _launchUpdate();
