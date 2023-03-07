@@ -31,7 +31,7 @@ class _Result extends State<Result> {
     await MyApp.analytics.setCurrentScreen(screenName: 'ios 검색결과');
   }
   var maps;
-  String shareUrl = 'https://oneidlab.page.link/prizm';
+  // String shareUrl = 'https://oneidlab.page.link/prizm';
   List programs = [];
   List song_cnts = [];
 
@@ -164,19 +164,6 @@ class _Result extends State<Result> {
     }
   }
 
-  Future<void> remoteConfig() async {
-    final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
-
-    remoteConfig.setDefaults({'shareUrl':shareUrl});
-    await remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: const Duration(minutes: 1),
-        minimumFetchInterval: Duration.zero)
-    );
-    await remoteConfig.fetchAndActivate();
-    String remoteUrl = remoteConfig.getString('shareUrl');
-    shareUrl = remoteUrl;
-  }
-
   final duplicateItems =
   List<String>.generate(1000, (i) => "$Container(child:Text $i)");
   var items = <String>[];
@@ -195,7 +182,7 @@ class _Result extends State<Result> {
 
   @override
   void initState() {
-    remoteConfig();
+    // remoteConfig();
     logSetscreen();
     getLink();
     fetchData();
@@ -793,14 +780,14 @@ class _Result extends State<Result> {
     final box = context.findRenderObject() as RenderBox?;
     if (Platform.isIOS) {
       await Share.share(
-          // 'https://oneidlab.page.link/prizmios',
-          '${shareUrl}ios',
+          'https://oneidlab.page.link/prizmios',
+          // '${shareUrl}ios',
           subject: 'Prizm',
           sharePositionOrigin:
           Rect.fromLTRB(0, 0, MediaQuery.of(context).size.width, MediaQuery.of(context).size.height * 0.5)
       );
     } else if (Platform.isAndroid) {
-      await Share.share(shareUrl, subject: 'Prizm');
+      await Share.share('https://oneidlab.page.link/prizm', subject: 'Prizm');
     }
   }
 
