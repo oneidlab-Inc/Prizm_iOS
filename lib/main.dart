@@ -127,26 +127,16 @@ class _TabPageState extends State<TabPage> {
     });
     // print('mount >> ${mounted.toString()}');
   }
-/*----------------------------------------------------------------------------------------------------*/
 
+  Future<void> remoteconfig() async{
+    final FirebaseRemoteConfig remoteConfig = await FirebaseRemoteConfig.instance;
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    var packageVersion = packageInfo.version;
+    remoteConfig.setDefaults({'appVersion' : packageVersion});
+    remoteConfig.fetchAndActivate();
 
-//   Future _launchUpdate() async {
-//     var version;
-//     PackageInfo packageInfo = await PackageInfo.fromPlatform();
-//     var packageVersion = packageInfo.version;
-//     MyApp.appVersion = packageVersion;
-//
-// print(_versionCheck.checkUpdatable(version));
-//
-//     _versionCheck.checkUpdatable(version);
-// // 스토어 업로드 후 주소 받고 활성화
-//
-// if (version == version) {
-//
-// showDefaultDialog();
-//
-// } else {}
-//   }
+    String appVersion = remoteConfig.getString(MyApp.appVersion);
+  }
 
   void showDefaultDialog() {
     showDialog(
@@ -260,6 +250,7 @@ class _TabPageState extends State<TabPage> {
 
   @override
   void initState() {
+    remoteconfig();
     getShortLink();
     fetchData();
     // _launchUpdate();

@@ -547,15 +547,21 @@ width: 10,
 
     if (Platform.isAndroid) {
       //플레이 스토어 주소 입력
-    //  _url = checkVersion ? Uri.parse('') : Uri.parse('PlayStore Url');
+     _url = checkVersion ? Uri.parse('') : Uri.parse(/* Play Store Url */'');
     } else if (Platform.isIOS) {
       //앱스토어 주소 입력
-      _url = checkVersion ? Uri.parse('') : Uri.parse('');
+      _url = checkVersion ? Uri.parse('') : Uri.parse(/* App Store Url */'');
     }
-    await launchUrl(_url);
+    if(await launchUrl(_url)) {
+      await canLaunchUrl(_url);
+    } else {
+      NetworkToast();
+      throw '$_url 연결실패';
+    }
+    // await launchUrl(_url);
   }
 
-  Future<bool> _onBackKey() async {
+  Future<bool> _onBackKey() async { // Android랑 코드 합쳐질시 사용
     return await showDialog(
         context: context,
         builder: (BuildContext context) {
