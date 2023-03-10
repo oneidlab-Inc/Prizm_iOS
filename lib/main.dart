@@ -106,6 +106,31 @@ class _TabPageState extends State<TabPage> {
   var deviceData;
   var _deviceData;
 
+  Future<void> remoteconfig() async {
+    final FirebaseRemoteConfig remoteConfig = await FirebaseRemoteConfig.instance;
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    var packageVersion = packageInfo.version;
+    remoteConfig.setConfigSettings(
+        RemoteConfigSettings(
+            fetchTimeout: const Duration(minutes: 1),
+            minimumFetchInterval: Duration.zero)
+    );
+    await remoteConfig.fetchAndActivate();
+    String appVersion = remoteConfig.getString('appVersion');
+
+    /**
+     * appVersion = remoteConfig 에서 변경 가능한 값
+     * packageVersion = 현재 설치되어있는 패키지의 버전
+     *
+     * Firebase의 RemoteConfig 에서 인앱 기본값 사용을 해제하고
+     * Default Value 에 변경하고 싶은 값을 입력
+     */
+
+    MyApp.appVersion = appVersion;
+    if(appVersion != packageVersion) {
+      showDefaultDialog();
+    }
+  }
 
   Future<void> initPlatformState() async {
     String? deviceId;
@@ -126,16 +151,6 @@ class _TabPageState extends State<TabPage> {
       _deviceData = deviceData;
     });
     // print('mount >> ${mounted.toString()}');
-  }
-
-  Future<void> remoteconfig() async{
-    final FirebaseRemoteConfig remoteConfig = await FirebaseRemoteConfig.instance;
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    var packageVersion = packageInfo.version;
-    remoteConfig.setDefaults({'appVersion' : packageVersion});
-    remoteConfig.fetchAndActivate();
-
-    String appVersion = remoteConfig.getString(MyApp.appVersion);
   }
 
   void showDefaultDialog() {
@@ -189,17 +204,16 @@ class _TabPageState extends State<TabPage> {
                                   onPressed: () {
                                     Uri _url = Uri.parse('');
                                     if (Platform.isAndroid) {
-                                      showDefaultDialog();
                                       updateToast();
+                                      _url = Uri.parse(/* Play Store url입력 */'');
                                     } else if (Platform.isIOS) {
-                                      print('ios platform');
+                                      updateToast();
+                                      _url = Uri.parse(/* App Store url 입력 */'');
                                     }
                                     try {
                                       launchUrl(_url);
-                                      print('launching $_url');
                                       canLaunchUrl(_url);
                                     } catch (e) {
-                                      print('$_url 연결실패');
                                       print(e);
                                     }
                                   },
@@ -256,7 +270,6 @@ class _TabPageState extends State<TabPage> {
     // _launchUpdate();
     // selectedColor();
     initPlatformState();
-    // MyApp.Uri = Uri.parse('http://dev.przm.kr/przm_api/');
     super.initState();
   }
 
