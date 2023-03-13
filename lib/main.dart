@@ -204,7 +204,7 @@ class _TabPageState extends State<TabPage> {
                                     } else if (Platform.isIOS) {
                                       print('ios platform');
                                     }
-                                    try {
+                                    try { 
                                       launchUrl(_url);
                                       print('launching $_url');
                                       canLaunchUrl(_url);
