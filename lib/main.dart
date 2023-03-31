@@ -24,6 +24,17 @@ import 'package:http/http.dart' as http;
 
 import 'Search_Result.dart';
 
+/*
+   * 터미널에서 flutter 명령어 사용 전 source ~/.bash_profile 환경 변수 설정
+   * 안드로이드 처럼 apk 같은 설치 파일은 추출 불가
+   * 코드 테스트는 무조건 ios 기기나 Simulator 로 해야함
+   * 디버깅은 Simulator 로 가능하지만 릴리즈 버전은 불가능
+   * 릴리즈 버전 확인시 터미널에 flutter run --release 명령어 입력 후 ios 기기 선택
+   *
+   * 앱 심사 당시 구글과 다르게 앨범사진이 들어간 스크린샷 다 삭제당함
+   * 추후 방법을 찾거나 소명해서 스크린샷 올려야 할 듯
+   */
+
 // Firebase token >>> 0eFX2gmgvHa1KCgYIARAAGA4SNwF-L9IrMqMOcqKmHXkMnCioaAdSqRU8F8aHv5KPZwEAQ_0QKI_JQTGWqRtcI6W_5GefpQ50IDo
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -51,7 +62,7 @@ class MyApp extends StatelessWidget {
 
   }
 
-  MyApp({Key? key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
 
   static var search;
@@ -110,7 +121,8 @@ class _TabPageState extends State<TabPage> {
     final FirebaseRemoteConfig remoteConfig = await FirebaseRemoteConfig.instance;
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     var packageVersion = packageInfo.version;
-    remoteConfig.setConfigSettings(
+    remoteConfig.setDefaults({'appVersion': packageVersion});
+    await remoteConfig.setConfigSettings(
         RemoteConfigSettings(
             fetchTimeout: const Duration(minutes: 1),
             minimumFetchInterval: Duration.zero)
@@ -146,6 +158,7 @@ class _TabPageState extends State<TabPage> {
     } else if (Platform.isIOS) {
       var iosInfo = await deviceInfoPlugin.iosInfo;
       deviceIdentifier = iosInfo.identifierForVendor!;
+      print('identifier >>> ${deviceIdentifier}');
     }
     setState(() {
       _deviceData = deviceData;
@@ -265,7 +278,7 @@ class _TabPageState extends State<TabPage> {
   @override
   void initState() {
     remoteconfig();
-    getShortLink();
+    // getShortLink();
     fetchData();
     // _launchUpdate();
     // selectedColor();
@@ -457,21 +470,21 @@ class _TabPageState extends State<TabPage> {
   }
 }
 
-Future <String> getShortLink() async {
-  // String dynamicLinkPrefix = 'https://oneidlab.page.link/prizmios';
-  final dynamicLinkParam = DynamicLinkParameters(
-    uriPrefix: 'https://oneidlab.page.link',
-    link: Uri.parse('https://oneidlab.page.link/prizmios'),
-  iosParameters: const IOSParameters(
-      bundleId: 'com.oneidlab.prizmios',
-      appStoreId: '6445834105',
-      customScheme: 'https://oneidlab.page.link/prizmios',
-      minimumVersion: '1.0.0',
-    ),
-  );
-  final dynamicLink = await FirebaseDynamicLinks.instance.buildShortLink(dynamicLinkParam);
-  return dynamicLink.shortUrl.toString();
-}
+// Future <String> getShortLink() async {
+//   // String dynamicLinkPrefix = 'https://oneidlab.page.link/prizmios';
+//   final dynamicLinkParam = DynamicLinkParameters(
+//     uriPrefix: 'https://oneidlab.page.link',
+//     link: Uri.parse('https://oneidlab.page.link/prizmios'),
+//   iosParameters: const IOSParameters(
+//       bundleId: 'com.oneidlab.prizmios',
+//       appStoreId: '6445834105',
+//       customScheme: 'https://oneidlab.page.link/prizmios',
+//       minimumVersion: '1.0.1',
+//     ),
+//   );
+//   final dynamicLink = await FirebaseDynamicLinks.instance.buildShortLink(dynamicLinkParam);
+//   return dynamicLink.shortUrl.toString();
+// }
 
 void updateToast() async {
   PackageInfo packageInfo = await PackageInfo.fromPlatform();

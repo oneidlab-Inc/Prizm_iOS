@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,6 +36,11 @@ class _PlayInfo extends State<PlayInfo> {
     await MyApp.analytics.setCurrentScreen(screenName: 'ios 프리즘 방송 재생정보');
   }
 
+  late Timer timer = Timer(const Duration(seconds: 6), () {
+    if(!mounted) return;
+    setState(() {});
+  });
+
   TextAlign textAlign = TextAlign.justify;
   FontWeight fontWeight = FontWeight.bold;
   _HighlightTextType type = _HighlightTextType.text;
@@ -62,8 +68,7 @@ class _PlayInfo extends State<PlayInfo> {
       setState(() {});
 
     } catch (e) {
-      print('json 통신 실패');
-      print(e);
+      rethrow;
     }
   }
 
@@ -98,14 +103,16 @@ class _PlayInfo extends State<PlayInfo> {
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    double c_width = MediaQuery.of(context).size.width * 1.0;
-    double c_height = MediaQuery.of(context).size.height * 1.0;
+    double c_width = MediaQuery.of(context).size.width;
+    double c_height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
         title: Text("프리즘 방송 재생정보",
             style: TextStyle(
                 color: isDarkMode ? Colors.white : Colors.black,
-                fontWeight: FontWeight.bold)),
+                fontWeight: FontWeight.bold
+            )
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           color: isDarkMode ? Colors.white : Colors.black,
@@ -160,11 +167,13 @@ class _PlayInfo extends State<PlayInfo> {
                                           return SizedBox(
                                               width: 70,
                                               height: 70,
-                                              child: Image.asset(
-                                                  'assets/no_image.png'));
+                                              child: Image.asset('assets/no_image.png')
+                                          );
                                         },
-                                      )),
-                                )),
+                                      )
+                                  ),
+                                )
+                            ),
                             Container(
                                 width: c_width * 0.6,
                                 padding: const EdgeInsets.only(top: 25),
@@ -175,15 +184,19 @@ class _PlayInfo extends State<PlayInfo> {
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             overflow: TextOverflow.ellipsis,
-                                            color: isDarkMode ? Colors.white : Colors.black)),
+                                            color: isDarkMode ? Colors.white : Colors.black
+                                        )
+                                    ),
                                     Container(
                                       margin: const EdgeInsets.only(top: 5),
                                       child: Text(widget.artist,
                                           style: TextStyle(
+                                              overflow: TextOverflow.ellipsis,
                                               color: isDarkMode
                                                   ? const Color.fromRGBO(123, 123, 123, 1)
-                                                  : const Color.fromRGBO(151, 151, 151, 1),
-                                              overflow: TextOverflow.ellipsis)),
+                                                  : const Color.fromRGBO(151, 151, 151, 1)
+                                          )
+                                      ),
                                     )
                                   ],
                                 )
@@ -207,7 +220,8 @@ class _PlayInfo extends State<PlayInfo> {
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 22,
-                                              color: isDarkMode ? Colors.white : Colors.black),
+                                              color: isDarkMode ? Colors.white : Colors.black
+                                          ),
                                         ),
                                       ),
                                       Expanded(
@@ -215,19 +229,11 @@ class _PlayInfo extends State<PlayInfo> {
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               Container(
-                                                  child: isExistTV
-                                                      ? Center(
-                                                    child: Text(
-                                                        '최신 TV 방송내역이 없습니다.',
-                                                        style: TextStyle(
-                                                            color: isDarkMode ? Colors.white : Colors.black,
-                                                            fontWeight:
-                                                            FontWeight.bold,
-                                                            fontSize: 20)),
-                                                  ) : _tv_list(info, widget)
+                                                  child: isExistTV ? loading() : _tv_list(info)
                                               )
                                             ],
-                                          ))
+                                          )
+                                      )
                                     ]
                                 )
                             ),
@@ -241,7 +247,9 @@ class _PlayInfo extends State<PlayInfo> {
                                       child: const Text('최신 RADIO 방송내역',
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 22)),
+                                              fontSize: 22
+                                          )
+                                      ),
                                     ),
                                     Expanded(
                                         child: Row(
@@ -249,29 +257,64 @@ class _PlayInfo extends State<PlayInfo> {
                                           children: [
                                             Container(
                                               child: isExistRadio
-                                                  ? Center(
-                                                child: Text('최신 RADIO 방송내역이 없습니다.',
-                                                    style: TextStyle(
-                                                        color: isDarkMode ? Colors.white : Colors.black,
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 20)),
-                                              ) : _radio_list(info_radio, widget),
+                                                  ? loading() : _radio_list(info_radio),
                                             )
                                           ],
-                                        ))
+                                        )
+                                    )
                                   ],
-                                )),
+                                )
+                            ),
                           ],
                         ),
                       )
                     ]),
               ),
-            )),
+            )
+        ),
       ),
     );
   }
 
-  Widget _radio_list(info_radio, widget) {
+  loading() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    if(timer.isActive) {
+      return Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 70, bottom: 30),
+            child: Center(
+              child: Image.asset('assets/loading.gif',
+                width: 40,
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
+            ),
+          ),
+          Center(
+            child: Text('방송 정보를 불러오고 있습니다.',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22
+                ),
+            ),
+          )
+        ],
+      );
+    } else {
+      return Center(
+        child: Text('최신 방송 정보가 없습니다.',
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 22
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _radio_list(info_radio) {
     return Expanded(
       child: ListView.builder(
           scrollDirection: Axis.horizontal,
@@ -376,7 +419,7 @@ class _PlayInfo extends State<PlayInfo> {
   }
 }
 
-Widget _tv_list(info, widget) {
+Widget _tv_list(info) {
   return Expanded(
     child: ListView.builder(
         scrollDirection: Axis.horizontal,

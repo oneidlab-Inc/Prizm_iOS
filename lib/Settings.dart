@@ -116,15 +116,18 @@ class _Settings extends State<Settings> {
                           color: Colors.greenAccent,
                           size: 25,
                         ),
-                        Text(
-                          ' 고객센터',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode
-                                  ? Colors.grey.withOpacity(0.8)
-                                  : Colors.black),
-                        ),
+                        Container (
+                          margin : const EdgeInsets.only(left: 15),
+                          child: Text(
+                            '고객센터',
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode
+                                    ? Colors.grey.withOpacity(0.8)
+                                    : Colors.black),
+                          ),
+                        )
                       ],
                     ),
                   ),
@@ -229,13 +232,16 @@ class _Settings extends State<Settings> {
                           color: Colors.greenAccent,
                           size: 25,
                         ),
-                        Text(
-                          ' 앱 설정 및 정보',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode ? Colors.grey.withOpacity(0.8) : Colors.black),
-                        ),
+                        Container(
+                          margin: const EdgeInsets.only(left: 20),
+                          child: Text(
+                            '앱 설정 및 정보',
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.grey.withOpacity(0.8) : Colors.black),
+                          ),
+                        )
                       ],
                     ),
                   ),

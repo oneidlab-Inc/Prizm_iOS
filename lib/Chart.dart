@@ -185,7 +185,7 @@ class _Chart extends State<Chart> {
                         ),
                         Center(
                           child: Text(
-                            '차트정보를 불러오고있습니다.',
+                            '차트정보를 불러오고 있습니다.',
                             style: TextStyle(
                                 color: isDarkMode
                                     ? Colors.white

@@ -151,14 +151,13 @@ class _Home extends State<Home> {
             ),
             actions: [
               IconButton(
-                // icon: ImageIcon(Image.asset('assets/settings.png').image),
                 icon: settingIcon,
                 splashColor: Colors.transparent,
                 visualDensity: const VisualDensity(horizontal: 4.0),
                 color: isDarkMode ? Colors.white : Colors.black,
                 onPressed: () {
                   isTransParent
-                      ? const Text('')
+                      ? null
                       : Navigator.push(context, MaterialPageRoute(builder: (context) => const Settings()),
                   );
                 },
@@ -190,22 +189,20 @@ class _Home extends State<Home> {
                                   colorFilter: _background))
                           : BoxDecoration(
                               image: DecorationImage(
-                                  image: AssetImage(isDarkMode
-                                      ? 'assets/BG_dark.gif'
-                                      : 'assets/BG_light.gif'),
-                                  alignment: isFlip
-                                      ? const Alignment(0, 1)
-                                      : const Alignment(0, 3),
-                                  colorFilter: _background)),
+                                  image: AssetImage(
+                                      isDarkMode ? 'assets/BG_dark.gif' : 'assets/BG_light.gif'
+                                  ),
+                                  alignment: isFlip ? const Alignment(0, 1) : const Alignment(0, 3),
+                                  colorFilter: _background
+                              )
+                      ),
                       child: Center(
                           child: Column(children: <Widget>[
                         Center(
                             child: Container(
                           margin: const EdgeInsets.only(bottom: 20),
                           child: RichText(
-                              text: isDarkMode
-                                  ? _textSpan_dark
-                                  : _textSpan_light
+                              text: isDarkMode ? _textSpan_dark : _textSpan_light
                           ),
                         )),
                         IconButton(
@@ -217,15 +214,12 @@ class _Home extends State<Home> {
                             onPressed: () async {
                               _permission();
                               var status = await Permission.microphone.status;
-                              print('status before >> ${status}');
                               if (status == PermissionStatus.denied) {
                                 PermissionToast();
-                                print('denied >> $status');
                                 return;
                               } else if (status ==
                                   PermissionStatus.permanentlyDenied) {
                                 PermissionToast();
-                                print('permanently >> $status');
                                 return _showDialog();
                               }
                               print(_connectionStatus);
@@ -247,12 +241,13 @@ class _Home extends State<Home> {
                                         color: Color.fromRGBO(43, 226, 193, 1),
                                         fontSize: 17,
                                         fontWeight: FontWeight.bold
-                                    ))
+                                    )
+                                  )
                                     : _textSpan_light = const TextSpan(
                                   text: '노래 분석중',
                                   style: TextStyle(
                                   color: Color.fromRGBO(43, 226, 193, 1),
-                                      fontSize: 17,
+                                  fontSize: 17,
                                   fontWeight: FontWeight.bold),
                                   );
                                   _background = const ColorFilter.mode(
@@ -267,7 +262,8 @@ class _Home extends State<Home> {
                                 }
                               }
                             }),
-                          ])
+                          ]
+                        )
                       )
                   ),
                 ],
@@ -281,8 +277,7 @@ class _Home extends State<Home> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return await showDialog(
       context: context,
-      barrierDismissible: false,
-      //다이얼로그 바깥을 터치 시에 닫히도록 하는지 여부 (true: 닫힘, false: 닫히지않음)
+      barrierDismissible: false, //다이얼로그 바깥을 터치 시에 닫히도록 하는지 여부 (true: 닫힘, false: 닫히지않음)
       builder: (BuildContext context) {
         return Dialog(
             shape: RoundedRectangleBorder(
@@ -292,9 +287,7 @@ class _Home extends State<Home> {
               width: 400,
               margin: const EdgeInsets.only(top: 20, bottom: 20),
               height: 150,
-              color: isDarkMode
-                  ? const Color.fromRGBO(66, 66, 66, 1)
-                  : Colors.white,
+              color: isDarkMode ? const Color.fromRGBO(66, 66, 66, 1) : Colors.white,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -314,7 +307,10 @@ class _Home extends State<Home> {
                             top: BorderSide(
                                 color: isDarkMode
                                     ? const Color.fromRGBO(94, 94, 94, 1)
-                                    : Colors.black.withOpacity(0.1)))),
+                                    : Colors.black.withOpacity(0.1)
+                            )
+                        )
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

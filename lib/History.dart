@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+import 'package:korea_regexp/korea_regexp.dart';
 import 'package:platform_device_id/platform_device_id.dart';
 import 'History_Bottom.dart';
 import 'Home.dart';
@@ -30,6 +31,11 @@ class _History extends State<History> {
   String? _deviceId;
   String? uid;
 
+  late Timer timer = Timer(const Duration(seconds: 3), () {
+    if(!mounted) return;
+    setState(() {});
+  });
+
   Future<void> initPlatformState() async {
     String? deviceId;
     try {
@@ -46,8 +52,8 @@ class _History extends State<History> {
     });
   }
 
-  static RegExp basicReg = (RegExp(
-      r'[0-9|ㄱ-ㅎ|ㅏ-ㅣ|가-힣|ᆞ|ᆢ|ㆍ|ᆢ|ᄀᆞ|ᄂᆞ|ᄃᆞ|ᄅᆞ|ᄆᆞ|ᄇᆞ|ᄉᆞ|ᄋᆞ|ᄌᆞ|ᄎᆞ|ᄏᆞ|ᄐᆞ|ᄑᆞ|ᄒᆞ|\s|~!@#$%^&*()_+=:`,./><?{}*|-|a-z|A-Z]'));
+  // static RegExp basicReg = (RegExp(r'[0-9|ㄱ-ㅎ|ㅏ-ㅣ|가-힣|ᆞ|ᆢ|ㆍ|ᆢ|ᄀᆞ|ᄂᆞ|ᄃᆞ|ᄅᆞ|ᄆᆞ|ᄇᆞ|ᄉᆞ|ᄋᆞ|ᄌᆞ|ᄎᆞ|ᄏᆞ|ᄐᆞ|ᄑᆞ|ᄒᆞ|\s|~!@#$%^&*()_+=:`,./><?{}*|-|a-z|A-Z]'));
+  static RegExp basicReg = (RegExp(r'[ㄱ-ㅎ|ㅏ-ㅣ|가-힣|ᆞ|ᆢ|ㆍ|ᆢ|ᄀᆞ|ᄂᆞ|ᄃᆞ|ᄅᆞ|ᄆᆞ|ᄇᆞ|ᄉᆞ|ᄋᆞ|ᄌᆞ|ᄎᆞ|ᄏᆞ|ᄐᆞ|ᄑᆞ|ᄒᆞ|a-z|A-Z|0-9|\s|~!@#$%^&*()_+=:`,./><?{}*\-]'));
 
   List song_info = [];
   List original = [];
@@ -90,25 +96,44 @@ class _History extends State<History> {
     print(query);
     List result = [];
     for (var p in song_info) {
+
       // print('검색결과  : ' + p['TITLE']);
-      var title = p["TITLE"].toString().toLowerCase();
-      var artist = p["ARTIST"].toString().toLowerCase();
-      var album = p['ALBUM'].toString().toLowerCase();
-      if (title.contains(query)) {
+      var title = p["TITLE"].toString().replaceAll(RegExp('\\s'), '').toLowerCase();
+      var title1 = p["TITLE"].toString().toLowerCase();
+      var artist = p["ARTIST"].toString().replaceAll(RegExp('\\s'), '').toLowerCase();
+      var artist1 = p['ARTIST'].toString().toLowerCase();
+      var album = p['ALBUM'].toString().replaceAll(RegExp('\\s'),'').toLowerCase();
+      var album1 = p['ALBUM'].toString().toLowerCase();
+
+      if(p['ARTIST'] == null) {
+        artist = p['ARTIST'].toString().replaceAll(RegExp('null'), 'Various Artists').replaceAll(RegExp('\\s'), '').toLowerCase();
+        artist1 = p['ARTIST'].toString().replaceAll(RegExp('null'), 'Various Artists').toLowerCase();
+      }
+
+      if(p['ALBUM'] == null) {
+        album = p['ALBUM'].toString().replaceAll(RegExp('null'), 'Various Album').replaceAll(RegExp('\\s'), '').toLowerCase();
+        album1 = p['ALBUM'].toString().replaceAll(RegExp('null'), 'Various Album').toLowerCase();
+      }
+
+      if (title.contains(getRegExp(query, RegExpOptions(initialSearch: true)))) {
         result.add(p);
-      } else if (artist.contains(query)) {
+      } else if (artist.contains(getRegExp(query, RegExpOptions(initialSearch: true)))) {
         result.add(p);
-      } else if (album.contains(query)) {
+      } else if (album.contains(getRegExp(query, RegExpOptions(initialSearch: true)))) {
+        result.add(p);
+      } else if(title1.contains(getRegExp(query, RegExpOptions(initialSearch: true)))) {
+        result.add(p);
+      } else if(artist1.contains(getRegExp(query, RegExpOptions(initialSearch: true)))) {
+        result.add(p);
+      } else if(album1.contains(getRegExp(query, RegExpOptions(initialSearch: true)))) {
         result.add(p);
       }
     }
 
     song_info = result;
-    print('검색결과 : $result');
+    // print('검색결과 : $result');
     setState(() {});
   }
-
-  /* ----------------------------------------------------- */
 
   final duplicateItems = List<String>.generate(10000, (i) => "Item $i");
 
@@ -172,12 +197,6 @@ class _History extends State<History> {
           SystemUiOverlay.bottom
         ]
     );
-    // SystemChrome.setEnabledSystemUIMode(
-    //   SystemUiMode.manual,
-    //   overlays: [
-    //     SystemUiOverlay.top
-    //   ]
-    // );
     return WillPopScope(
         onWillPop: () async {
           return _onBackKey();
@@ -267,35 +286,62 @@ class _History extends State<History> {
                                     await MyApp.analytics.logEvent(name: '히스토리 검색');
                                   },
                                 )
-                                    : null)),
+                                    : null
+                            )
+                          ),
                       ],
                     ),
                   ),
                   isExist
-                      ? Container(
-                    margin: EdgeInsets.only(top: 100),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Center(
-                          child: Text('최근 검색 기록이 없습니다.',
-                            style: TextStyle(
-                                color: isDarkMode
-                                    ? Colors.white
-                                    : Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 22
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ) : _listView(song_info, info)
+                      ? loading() : _listView(song_info, info)
                 ],
               ),
             )
         )
     );
+  }
+
+  loading() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    if(timer.isActive) {
+      return Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 100, bottom: 30),
+            child: Center(
+              child: Image.asset('assets/loading.gif',
+                width: 40,
+                color: isDarkMode ? Colors.white : Colors.black
+              )
+            ),
+          ),
+          Center(
+            child: Text(
+              '검색 내역을 불러오고 있습니다.',
+              style: TextStyle(
+                color: isDarkMode ? Colors.white : Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 22
+              ),
+            ),
+          )
+        ],
+      );
+    } else {
+      return Container(
+        margin: EdgeInsets.only(top: 170),
+        child: Center(
+          child: Text('최근 검색 기록이 없습니다.',
+            style: TextStyle(
+              color: isDarkMode ? Colors.white : Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 22
+            ),
+          ),
+
+        ),
+      );
+    }
   }
 
   Future<bool> _onBackKey() async {
