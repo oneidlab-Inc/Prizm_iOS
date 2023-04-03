@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:package_info/package_info.dart';
 import 'package:platform_device_id/platform_device_id.dart';
 import 'package:share_plus/share_plus.dart';
 import 'chart/chart_container.dart';
@@ -31,7 +32,23 @@ class _Result extends State<Result> {
     await MyApp.analytics.setCurrentScreen(screenName: 'ios 검색결과');
   }
   var maps;
-  // String shareUrl = 'https://oneidlab.page.link/prizm';
+  String url = 'https://oneidlab.page.link/prizm';
+
+  Future<void> remoteconfig() async {
+    final FirebaseRemoteConfig remoteConfig = await FirebaseRemoteConfig.instance;
+    remoteConfig.setDefaults({'shareUrl' : url});
+    await remoteConfig.setConfigSettings(
+      RemoteConfigSettings(
+          fetchTimeout: const Duration(minutes: 1),
+          minimumFetchInterval: Duration.zero)
+    );
+    await remoteConfig.fetchAndActivate();
+
+    String shareUrl = remoteConfig.getString('shareUrl');
+
+    url = shareUrl;
+  }
+
   List programs = [];
   List song_cnts = [];
 
@@ -164,35 +181,16 @@ class _Result extends State<Result> {
     }
   }
 
-  final duplicateItems =
-  List<String>.generate(1000, (i) => "$Container(child:Text $i)");
-  var items = <String>[];
-
-  Future<void> getLink() async {
-    final dynamicLinkParams = DynamicLinkParameters(
-        link: Uri.parse('https://oneidlab.page.link/'),
-        uriPrefix: 'https://oneidlab.page.link/prizmios',
-      iosParameters: const IOSParameters(
-          bundleId: 'com.oneidlab.prizmios',
-      appStoreId: '123456789',
-      minimumVersion: '1.0.0'
-      ),
-    );
-  }
-
   @override
   void initState() {
-    // remoteConfig();
+    remoteconfig();
     logSetscreen();
-    getLink();
     fetchData();
     super.initState();
   }
 
   @override
   void dispose() {
-    print('dispose');
-    line_chart(song_cnts);
     super.dispose();
   }
 
@@ -216,7 +214,8 @@ class _Result extends State<Result> {
     double c_width = MediaQuery.of(context).size.width * 1.0;
     final isPad = c_width > 550;
     final isCNTS = song_cnts.length > 3;
-    final isExist = programs.length == 0;
+    final isExist = programs.isEmpty;
+
     final isArtistNull = maps['ARTIST'] == null;
     final isAlbumNull = maps['ALBUM'] == null;
     final isImage = maps['IMAGE'].toString().startsWith('assets') != true;
@@ -510,9 +509,11 @@ class _Result extends State<Result> {
                                             style: TextStyle(
                                                 color: isDarkMode ? Colors.white : Colors.black,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 20))
+                                                fontSize: 20
+                                            )
+                                        )
                                     )
-                                        : Row(
+                                    : Row(
                                       children: [_listView(programs)],
                                     )
                                 )
@@ -780,14 +781,13 @@ class _Result extends State<Result> {
     final box = context.findRenderObject() as RenderBox?;
     if (Platform.isIOS) {
       await Share.share(
-          'https://oneidlab.page.link/prizmios',
-          // '${shareUrl}ios',
+          '${url}ios',
           subject: 'Prizm',
           sharePositionOrigin:
           Rect.fromLTRB(0, 0, MediaQuery.of(context).size.width, MediaQuery.of(context).size.height * 0.5)
       );
     } else if (Platform.isAndroid) {
-      await Share.share('https://oneidlab.page.link/prizm', subject: 'Prizm');
+      await Share.share(url, subject: 'Prizm');
     }
   }
 
@@ -803,12 +803,11 @@ class _Result extends State<Result> {
         dateTime = DateTime(now.year, now.month - i, 1);
         date = DateFormat('MM').format(dateTime);
         year = DateFormat('yy').format(now);
-// print(dateTime);
 
         dateList.add(date);
       }
     } catch (e) {
-      print('bottom title : $e');
+      rethrow;
     }
     reversedDate = [];
     reversedDate = List.from(dateList.reversed);
