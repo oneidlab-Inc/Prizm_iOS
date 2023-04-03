@@ -19,7 +19,7 @@ PODS:
   - Firebase/RemoteConfig (10.3.0):
     - Firebase/CoreOnly
     - FirebaseRemoteConfig (~> 10.3.0)
-  - firebase_analytics (10.1.0):
+  - firebase_analytics (10.1.4):
     - Firebase/Analytics (= 10.3.0)
     - firebase_core
     - Flutter
@@ -249,7 +249,7 @@ SPEC CHECKSUMS:
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
   Firebase: f92fc551ead69c94168d36c2b26188263860acd9
-  firebase_analytics: 9f3a4cb560a59976b2c48707abae2d4cb94bcb3a
+  firebase_analytics: 4f57c422c9c6225cd5ddd5fca28f92bde5fb21b5
   firebase_core: 128d8c43c3a453a4a67463314fc3761bedff860b
   firebase_dynamic_links: e5ca49679928f5d46e2db5168656975eae39d379
   firebase_remote_config: 4f27b3b5953fcdac0115a27138bbc8796f1e2c76
